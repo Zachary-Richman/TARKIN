@@ -1,7 +1,7 @@
 # Tarkin 
 Trajectory Analysis and Resonance Klassifier for Inner N-body systems (TARKIN)
 
-> Extending SPOCK, a Princeton developed machine learning stability classifier, to compact planetary systems with outer giant companions
+> Extending [SPOCK](https://arxiv.org/abs/2007.06521), a Princeton developed machine learning stability classifier, to compact planetary systems with outer giant companions
 
 ## Overview
 Thousands of multi-planet systems discovered by NASA's Kepler Space Telescope contain small planets packed tightly 
@@ -23,11 +23,9 @@ If SPOCK's predictions fail under new conditions (as hypothesized), then we proc
 
 **Phase 2 - Generate a new training dataset**
 We build an automated pipeline that systematically sweeps the outer giant parameter space with varying mass from 0.3 to 3 Jupiter masses and semi-major axis from 5 to 30 AU.
-We run thousands of REBOUND simulations and recording instability timescales. 
+We run thousands of [REBOUND](https://rebound.hanno-rein.de/) simulations and recording instability timescales. 
 Each run produces one row in the training dataset.
 
 **Phase 3 - Train an extended classifier**
 We train an XGBoost classifier on the new dataset, incorporating SPOCK's original feature set plus `outer giant mass`, `semi-major axis`, and `mass ratio` as additional input features. 
 We compare the extended model's accuracy against vanilla SPOCK on a held-out test set of systems with outer giant companions.
-
-TODO: source and attributions to this readme
