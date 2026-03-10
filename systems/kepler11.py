@@ -14,7 +14,7 @@ from constants import radius_to_mass, period_to_a
 
 class Kepler11(BaseSystem):
     name = "kepler11"
-    star_mass = 1.042
+    star_mass = 0.961
 
     planets = [
         {"name": "b", "m": radius_to_mass(1.80), "a": period_to_a(10.30, star_mass)},

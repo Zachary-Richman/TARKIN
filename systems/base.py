@@ -12,18 +12,17 @@ class BaseSystem:
         self.seed: int = seed
         self.outer_giant: dict | None = outer_giant
         self._rng = np.random.default_rng(seed)
-        self.sim = rebound.Simulation()
 
 
     def build(self):
         working_planets = copy.deepcopy(self.planets)
-
-        self.sim.add(m=self.star_mass, hash="star")  # adding the star
+        sim = rebound.Simulation()
+        sim.add(m=self.star_mass, hash="star")  # adding the star
 
         # add in the planets
         for planet in working_planets:
             self._fill_defaults(planet)
-            self.sim.add(
+            sim.add(
                 m = planet["m"],
                 a = planet["a"],
                 e = planet["e"],
@@ -38,7 +37,7 @@ class BaseSystem:
         if self.outer_giant is not None:
             og = copy.deepcopy(self.outer_giant)
             self._fill_defaults(og)
-            self.sim.add(
+            sim.add(
                 m = og["m"],
                 a = og["a"],
                 e = og["e"],
@@ -48,9 +47,10 @@ class BaseSystem:
                 f = og["f"],
                 hash = "outer_giant",
             )
+            self.planets.append(og)
 
-        self.sim.move_to_com()  # stability, keeps in frame
-        return self.sim
+        sim.move_to_com()  # stability, keeps in frame
+        return sim
 
     def _fill_defaults(self, planet: dict):
         """
