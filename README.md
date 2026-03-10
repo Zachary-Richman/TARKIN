@@ -17,15 +17,18 @@ Many real Kepler systems, however, include a distant giant planet, whose slow an
 
 ## Methodology
 **Phase 1 - Determining if SPOCK Fails (and if so, characterize it)**
+
 Using Rebound, a high-precision N-body integration package, we simulate compact inner planetary systems both with and without an outer companion.
 Then, we run SPOCK's classifier on each system and compare its predicted stability against the ground truth from full integration. 
 If SPOCK's predictions fail under new conditions (as hypothesized), then we proceed to phase 2 and 3.
 
 **Phase 2 - Generate a new training dataset**
+
 We build an automated pipeline that systematically sweeps the outer giant parameter space with varying mass from 0.3 to 3 Jupiter masses and semi-major axis from 5 to 30 AU.
 We run thousands of [REBOUND](https://rebound.hanno-rein.de/) simulations and recording instability timescales. 
 Each run produces one row in the training dataset.
 
 **Phase 3 - Train an extended classifier**
+
 We train an XGBoost classifier on the new dataset, incorporating SPOCK's original feature set plus `outer giant mass`, `semi-major axis`, and `mass ratio` as additional input features. 
 We compare the extended model's accuracy against vanilla SPOCK on a held-out test set of systems with outer giant companions.

@@ -7,7 +7,7 @@ MAX_ECCENTRICITY = 0.9
 
 def radius_to_mass(radius):
     # uses the approximation m = r^2.06
-    return (radius ** 2.06) ** M_EARTH
+    return (radius ** 2.06) * M_EARTH
 
 def period_to_a(period_days, m_star):
     period = period_days * DAY
