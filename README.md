@@ -10,7 +10,6 @@ interactions will eventually cause collisions or ejections, is a longstanding op
 a machine learning model that predicts the long-term stability of compact planetary systems at orders of magnitude faster than running full N-body simulations. 
 SPOCK represented a major advance in computational astrophysics, but it was trained exclusively on systems with no outer companion planets.
 Many real Kepler systems, however, include a distant giant planet, whose slow and persistent gravitational influence on the inner system is entirely unaccounted for in SPOCK's predictions. 
-**Like Grand Moff Tarkin commanding from a distance, the outer giant exerts outsized destructive reach on everything closer to the star.**
 
 ## Research Question
 > Does the presence of an outer giant companion degrade SPOCK's predictive accuracy on compact inner systems? And, can a retrained model incorporating outer giant parameters recover that accuracy?

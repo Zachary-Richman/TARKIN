@@ -1,9 +1,20 @@
+import numpy as np
+
+
 DAY = 1 / 365.25
 M_EARTH = 3.003e-6 # solar masses
 INTEGRATOR = "whfast"
 DT = 0.001 # years
 M_JUP = 9.548e-4 # solar masses
 MAX_ECCENTRICITY = 0.9
+E_DEFAULT: float = 0.0
+INC_MAX = 0.05
+TWO_PI = 2 * np.pi
+
+MAX_ECCENTRICITY = 0.9       # flag if e exceeds this
+MIN_PERIAPSIS    = 0.01      # AU — stellar collision threshold
+MAX_SEPARATION   = 100.0     # AU — ejection threshold
+
 
 def radius_to_mass(radius):
     # uses the approximation m = r^2.06

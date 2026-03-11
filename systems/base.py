@@ -2,6 +2,8 @@ import rebound
 from tabulate import tabulate # used for the summary function
 import numpy as np
 import copy
+from constants import E_DEFAULT, INC_MAX, TWO_PI
+
 
 class BaseSystem:
     name = "BaseSystem"
@@ -45,7 +47,7 @@ class BaseSystem:
                 Omega = og["Omega"],
                 omega = og["omega"],
                 f = og["f"],
-                hash = "outer_giant",
+                hash = "outer_giant",  # the planets list doesn't get this name, instead its just "unnamed"
             )
             self.planets.append(og)
 
@@ -64,9 +66,6 @@ class BaseSystem:
         omega (periapsis) -> [0, 2pi) - radians
         f (true anomaly, starting pos) -> [0, 2pi) - radians
         """
-        E_DEFAULT: float = 0.0
-        INC_MAX = 0.05
-        TWO_PI = 2 * np.pi
 
         for field in ("m", "a"):
             if field not in planet:
