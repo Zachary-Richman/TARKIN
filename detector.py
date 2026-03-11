@@ -159,7 +159,7 @@ class Detector:
                 )
 
             periapsis = orb.a * (1 - orb.e)  # distance to the center  = semi-major-axis * eccentricity
-            if periapsis > const.MIN_PERIAPSIS:
+            if periapsis < const.MIN_PERIAPSIS:
                 return UnstableDetection(
                     event_type="stellar_collision",
                     time=timestep,
