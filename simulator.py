@@ -1,3 +1,4 @@
+import rebound
 from constants import INTEGRATOR, DT
 
 def config(system) -> rebound.Simulation:
