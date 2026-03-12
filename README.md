@@ -11,16 +11,16 @@ Trajectory Analysis and Resonance Klassifier for Inner N-body systems (TARKIN)
 ----
 Thousands of multi-planet systems discovered by NASA's Kepler Space Telescope contain small planets packed tightly 
 together in very close orbits around their host star. Whether these systems remain stable over billions of years, or whether gravitational 
-interactions will eventually cause collisions or ejections, is a longstanding open question in orbital dynamics. 
+interactions will eventually cause collisions or ejections, is a longstanding open question in orbital dynamics.
+
 
 In 2020, researchers at Princeton published SPOCK (Stability of Planetary Orbital Configurations Klassifier), 
 a machine learning model that predicts the long-term stability of compact planetary systems at orders of magnitude faster than running full N-body simulations. 
 SPOCK represented a major advance in computational astrophysics, but it was trained exclusively on systems with no outer companion planets.
 Many real Kepler systems, however, include a distant giant planet, whose slow and persistent gravitational influence on the inner system is entirely unaccounted for in SPOCK's predictions. 
----
 ## Research Question
 > Does the presence of an outer giant companion systematically degrade SPOCK's predictive accuracy on compact inner systems; and if so, at what giant mass and orbital separation does this effect become significant?
----
+
 ## An Empirical Motivation
 Before building anything, I ran SPOCK on the first three planets (`b`, `c`, `d`) of the Kepler 11 system under three conditions:
 
@@ -52,7 +52,7 @@ print("Close giant:", model.predict_stable(sim3))  #  0.79106146
 SPOCK's predicted stability probability is statistically invariant to the outer giant's presence; 
 even when a 3 Jupiter-mass companion orbits at 3 AU, well within the range expected to produce measurable secular forcing on the inner system. 
 
----
+
 ## Methodology
 **Phase 1 - Determining if SPOCK Fails (and if so, characterize it)**
 
@@ -74,8 +74,6 @@ An automated pipeline runs across a grid of outer giant parameters
 We train a standalone XGBoost Classifier on the now generated dataset. Unlike SPOCK, TARKIN treats the outer
 giants properties (`mass`, `semi-major axis`, `period`, `hill stability margin`) as additional inputs alongside the inner-system features.
 
----
-
 ## Design Decisions
 **WHFast > IAS515**. 
 The WHFast sympletic integrator conserves a modified Hamiltonian exactly over long timescale and runs 10-100x faster that REBOUND's default integrator. 
@@ -83,7 +81,7 @@ The WHFast sympletic integrator conserves a modified Hamiltonian exactly over lo
 **Log uniform planet masses**.
 Synthetic planet masses are drawn log-uniformly from 1–20 Earth masses, matching the observed Kepler compact system population (Fabrycky et al. 2012) and avoiding overrepresentation of high-mass planets.
 
----
+
 ## References
  
 - Tamayo et al. 2020: [SPOCK: Predicting Planetary Stability](https://arxiv.org/abs/2007.06521)
@@ -92,5 +90,4 @@ Synthetic planet masses are drawn log-uniformly from 1–20 Earth masses, matchi
 - Rein & Tamayo 2015: [REBOUND: WHFast](https://arxiv.org/abs/1506.01084)
 - Livesey & Becker 2024: [Giant Planet Companions and Inner System Stability](https://arxiv.org/abs/2412.18661)
 
----
 This project is still very much under development and does not claim to make any scientific claims. As a student, I intend to learn and develop with time, the programming and scientific journey will be documented in this repository.
