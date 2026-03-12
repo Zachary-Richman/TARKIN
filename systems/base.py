@@ -49,7 +49,6 @@ class BaseSystem:
                 f = og["f"],
                 hash = "outer_giant",  # the planets list doesn't get this name, instead its just "unnamed"
             )
-            self.planets.append(og)
 
         sim.move_to_com()  # stability, keeps in frame
         return sim

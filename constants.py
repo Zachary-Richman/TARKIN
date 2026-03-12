@@ -15,6 +15,11 @@ MAX_ECCENTRICITY = 0.9       # flag if e exceeds this
 MIN_PERIAPSIS    = 0.01      # AU — stellar collision threshold
 MAX_SEPARATION   = 100.0     # AU — ejection threshold
 
+# time intervals
+T_SM = 1e4
+T_MD = 1e6
+T_LG = 1e9
+
 
 def radius_to_mass(radius):
     # uses the approximation m = r^2.06
