@@ -1,5 +1,5 @@
 import rebound
-from constants import INTEGRATOR, DT
+from core.constants import INTEGRATOR, DT
 
 def config(system) -> rebound.Simulation:
     sim = system.build()

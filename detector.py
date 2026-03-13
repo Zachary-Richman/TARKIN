@@ -95,7 +95,6 @@ class Detector:
         :return: UnstableDetection instance or None if no instability events
         """
         sim = self.sim
-        t = sim.t
 
         # define the individual pieces
         star = sim.particles[0]
@@ -108,7 +107,9 @@ class Detector:
                 pass
 
         inner_planets = [
-            p for p in sim.particles if p.index != star.index and p.index != outer_planet.index
+            p for p in sim.particles
+            if p.index != star.index
+               and (outer_planet is None or p.index != outer_planet.index)
         ]
 
         # check inners
@@ -125,27 +126,28 @@ class Detector:
                 if d < R_mH:
                     return UnstableDetection(
                         event_type="close_encounter_inner",
-                        time=timestep,
-                        body=planet_i.hash,
+                        time=sim.t,
+                        body=str(planet_i.hash),
                         value=d,
                         threshold=R_mH
                     )
 
         # check outers (2)
-        for _, planet_i in enumerate(inner_planets):
-            d = self._distance(planet_i, outer_planet)
-            R_mH = self.hill_radii[(  # getting min/max as to guarantee getting the right object
-                planet_i.index, outer_planet.index
-            )]
+        if outer_planet is not None:
+            for _, planet_i in enumerate(inner_planets):
+                d = self._distance(planet_i, outer_planet)
+                R_mH = self.hill_radii[(  # getting min/max as to guarantee getting the right object
+                    planet_i.index, outer_planet.index
+                )]
 
-            if d < R_mH:
-                return UnstableDetection(
-                    event_type="close_encounter_outer",
-                    time=timestep,
-                    body=planet_i.hash,
-                    value=d,
-                    threshold=R_mH
-                )
+                if d < R_mH:
+                    return UnstableDetection(
+                        event_type="close_encounter_outer",
+                        time=sim.t,
+                        body=str(planet_i.hash),
+                        value=d,
+                        threshold=R_mH
+                    )
 
         # check failsafe (3 & 4)
         for planet in inner_planets:
@@ -155,8 +157,8 @@ class Detector:
                 # orbit can fail if the particle escaped, treat as ejection
                 return UnstableDetection(
                     event_type="ejection",
-                    time=timestep,
-                    body=planet.hash,
+                    time=sim.t,
+                    body=str(planet.hash),  # else returns a c_unit
                     value=float("nan"),
                     threshold=const.MAX_SEPARATION
                 )
@@ -165,8 +167,8 @@ class Detector:
             if orb.e > const.MAX_ECCENTRICITY:
                 return UnstableDetection(
                     event_type="high_eccentricity",
-                    time=timestep,
-                    body=planet.hash,
+                    time=sim.t,
+                    body=str(planet.hash),
                     value=orb.e,
                     threshold=const.MAX_ECCENTRICITY
                 )
@@ -175,8 +177,8 @@ class Detector:
             if periapsis < const.MIN_PERIAPSIS:
                 return UnstableDetection(
                     event_type="stellar_collision",
-                    time=timestep,
-                    body=planet.hash,
+                    time=sim.t,
+                    body=str(planet.hash),
                     value=periapsis,
                     threshold=const.MIN_PERIAPSIS
                 )
@@ -185,8 +187,8 @@ class Detector:
             if orb.a > const.MAX_SEPARATION:
                 return UnstableDetection(
                     event_type="ejection",
-                    time=timestep,
-                    body=planet.hash,
+                    time=sim.t,
+                    body=str(planet.hash),
                     value=orb.a,
                     threshold=const.MAX_SEPARATION
                 )

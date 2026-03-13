@@ -24,7 +24,7 @@ class Run:
     check_interval: float
 
 
-def run(system, t_max: float = T_MD, check_interval: float = 1.0) -> Run | None:
+def run(system, t_max: float = T_MD, check_interval: float = 50.0) -> Run | None:
     """
     :param system:
     :param t_max:
@@ -32,16 +32,19 @@ def run(system, t_max: float = T_MD, check_interval: float = 1.0) -> Run | None:
     :return:
     """
     outer_giant = system.outer_giant or {"m": 0.0, "a": 0.0}
-    run_id = f"{system.name}-{system.seed}-{outer_giant['m']}-{outer_giant['a']}"
+    run_id = f"{system.name}-{system.seed}-{outer_giant['m']:.6f}-{int(outer_giant['a'])}"
+    #print(f"[{run_id}] starting SPOCK inner")
 
-    # SPOCK on inner system only
     inner_system = system.__class__(seed=system.seed, outer_giant=None)
     sim_inner = config(inner_system)
     spock_inner = FeatureClassifier().predict_stable(sim_inner)
+    #print(f"[{run_id}] SPOCK inner done: {spock_inner}")
 
-    # SPOCK on full system (with giant if present)
     sim_full = config(system.__class__(seed=system.seed, outer_giant=system.outer_giant))
     spock_full = FeatureClassifier().predict_stable(sim_full)
+    #print(f"[{run_id}] SPOCK full done: {spock_full}")
+
+    #print(f"[{run_id}] starting integration")
 
     # main integration
     sim = config(system)
@@ -52,7 +55,19 @@ def run(system, t_max: float = T_MD, check_interval: float = 1.0) -> Run | None:
         "instability_time": -1
     }
 
+    last_check = [0.0]  # mutable container so the closure can write to it
+
     def heartbeat(sim_pointer):
+        t = sim_pointer.contents.t
+
+        # throttle — only run the check every check_interval years
+        if t - last_check[0] < check_interval:
+            return
+        last_check[0] = t
+
+        #if int(t) % 10000 == 0:  # print every 10,000 years
+        #    print(f"[{run_id}] heartbeat t={t:.0f}", flush=True)
+
         if result["detection"] is not None: return # detection found
 
         detection: None | UnstableDetection = detector.check()
@@ -72,7 +87,7 @@ def run(system, t_max: float = T_MD, check_interval: float = 1.0) -> Run | None:
         system_name=system.name,
         giant_mass_mjup=outer_giant["m"] / constants.M_JUP,
         giant_a=outer_giant["a"],
-        stable=result["detection"] is none,
+        stable=result["detection"] is None,
         instability_time=result["instability_time"],
         detection_type=result["detection"].event_type if result["detection"] else "",
         detection_body=result["detection"].body if result["detection"] else "",

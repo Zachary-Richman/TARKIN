@@ -5,14 +5,16 @@ from core import constants as const
 from dataclasses import asdict, fields
 from datetime import datetime, date
 from runner import run, Run
+import rebound
 from systems.SyntheticTestingSystem import SyntheticTestingSystem
 
-outer_giant_jup_multipliers = [0.3, 0.6, 1.0, 1.5, 2.0, 3.0]
-outer_giant_a = [5, 7, 10, 13, 17, 22, 30]  # in AU
-seeds = 100
+OUTER_GIANT_JUP_MULTIPLIER = [0.3, 0.6, 1.0, 1.5, 2.0, 3.0]
+OUTER_GIANT_A = [5, 7, 10, 13, 17, 22, 30]  # in AU
+SEED = 100
 T_MAX = 1000000
 CHECK_INTERVAL = 1
 HEADERS = [f.name for f in fields(Run)]
+FILENAME = "tarkin_sweep.csv"
 
 metadata = f"""
 # TARKIN Sweep Output
@@ -21,10 +23,10 @@ metadata = f"""
 # T_MAX: {T_MAX}
 # Check Interval: {CHECK_INTERVAL}
 # DT: 0.001 years
-# Integrator: {constants.INTEGRATOR}
-# giant_mass_multipliers: {outer_giant_jup_multipliers}
-# giant_a's: {outer_giant_a}
-# seeds: 0-{seeds - 1}
+# Integrator: {const.INTEGRATOR}
+# giant_mass_multipliers: {OUTER_GIANT_JUP_MULTIPLIER}
+# giant_a's: {OUTER_GIANT_A}
+# seeds: 0-{SEED - 1}
 """
 
 @ray.remote
@@ -49,11 +51,13 @@ def _combo_to_run_id(seed: int, a: float | None, m: float | None) -> str:  # con
 def sweep():
     all_combos = []  # long term we can track which ones have been done in the csv file for pause/resume work
 
-    for seed in range(seeds):
+    for seed in range(SEED):
         all_combos.append((seed, None, None))  # control
-        for a in outer_giant_a:
-            for m in outer_giant_jup_multipliers:
+        for a in OUTER_GIANT_A:
+            for m in OUTER_GIANT_JUP_MULTIPLIER:
                 all_combos.append((seed, a, m))
+
+    completed_ids = []  # FUTURE: this can read the csv, add completed tuple groups (see TODO above function) and pick up when failures happen
 
     pending = [
         c for c in all_combos
@@ -66,7 +70,7 @@ def sweep():
 
     # write headers if not exists
     if not os.path.exists(FILENAME):
-        with open(FILENAME) as f:
+        with open(FILENAME, "w") as f:
             f.write(metadata)
             csv.writer(f).writerow(HEADERS)
 
@@ -76,7 +80,6 @@ def sweep():
 
     futures = [run_simulation.remote(seed, a, m) for seed, a, m, in pending]
 
-    total = len(futures)
     completed = 0
     failed = 0
     start = datetime.now()
@@ -88,7 +91,7 @@ def sweep():
             done, futures = ray.wait(futures, num_returns=1, timeout=600)
 
             if not done:  # timeout hit w/ no resp
-                print("[SWEEP] Warning: No task complete in 10 minutes. {len(futures)} futures remaining.")
+                print(f"[SWEEP] Warning: No task complete in 10 minutes. {len(futures)} futures remaining.")
                 continue
 
             try:
@@ -104,7 +107,7 @@ def sweep():
 
                 print(
                     f"[{completed}/{len(futures)}] {(completed / len(futures)) * 100:.1f}% "
-                    f"rate: {rate:.1f}% "
+                    f"rate: {rate:.1f}/s "
                     f"remaining: {eta / 60:.1f}min "
                     f"id: {result['run_id']}"
                 )
