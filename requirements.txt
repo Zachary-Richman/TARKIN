@@ -2,3 +2,5 @@ tabulate
 rebound
 numpy
 spock
+ipython
+ray

@@ -9,7 +9,7 @@ Source:
 """
 
 from systems.base import BaseSystem
-from constants import radius_to_mass, period_to_a
+from core.constants import radius_to_mass, period_to_a
 
 
 class Kepler11(BaseSystem):

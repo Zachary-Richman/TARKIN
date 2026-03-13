@@ -1,8 +1,6 @@
-import math
-
 import rebound
 from dataclasses import dataclass
-import constants as const
+from core import constants as const
 from typing import Literal
 
 @dataclass
@@ -22,8 +20,15 @@ class UnstableDetection:
 class Detector:
     def __init__(self, sim: rebound.Simulation):
         self.sim = sim
+        self.has_outer_giant = self._check_has_outer_giant()
         self.hill_radii = self._generate_static_hill_radii()
 
+    def _check_has_outer_giant(self) -> bool:
+        try:
+            _ = self.sim.particles["outer_giant"]
+            return True
+        except rebound.ParticleNotFound:
+            return False
 
     def _generate_static_hill_radii(self) -> dict:
         """
@@ -77,7 +82,7 @@ class Detector:
             d_x ** 2 + d_y ** 2 + d_z ** 2
         ) ** (1/2)
 
-    def check(self, timestep: int) -> UnstableDetection | None:
+    def check(self) -> UnstableDetection | None:
         """
         Check a simulation snapshot for instability events.
 
@@ -89,11 +94,19 @@ class Detector:
 
         :return: UnstableDetection instance or None if no instability events
         """
-        self.sim.integrate(timestep)
         sim = self.sim
+        t = sim.t
+
         # define the individual pieces
         star = sim.particles[0]
-        outer_planet = sim.particles["outer_giant"]
+
+        outer_planet = None
+        if self.has_outer_giant:
+            try:
+                outer_planet = sim.particles["outer_giant"]
+            except rebound.ParticleNotFound:
+                pass
+
         inner_planets = [
             p for p in sim.particles if p.index != star.index and p.index != outer_planet.index
         ]

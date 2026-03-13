@@ -11,7 +11,6 @@ E_DEFAULT: float = 0.0
 INC_MAX = 0.05
 TWO_PI = 2 * np.pi
 
-MAX_ECCENTRICITY = 0.9       # flag if e exceeds this
 MIN_PERIAPSIS    = 0.01      # AU — stellar collision threshold
 MAX_SEPARATION   = 100.0     # AU — ejection threshold
 

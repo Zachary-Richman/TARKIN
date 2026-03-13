@@ -12,7 +12,7 @@ Source:
 
 import numpy as np
 from systems.base import BaseSystem
-from constants import M_EARTH
+from core.constants import M_EARTH
 
 
 N_PLANETS    = 3     # always 3 inner planets
@@ -24,7 +24,7 @@ A_MAX        = 0.15  # AU — innermost planet maximum
 M_PLANET_MIN = 1.0   # Earth masses
 M_PLANET_MAX = 20.0  # Earth masses
 
-K_MIN        = 3.0   # mutual Hill radii minimum spacing (Pu & Wu 2015)
+K_MIN        = 3.5   # mutual Hill radii minimum spacing (Pu & Wu 2015)
 K_MAX        = 8.0   # mutual Hill radii maximum spacing
 
 

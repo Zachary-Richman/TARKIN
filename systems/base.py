@@ -2,7 +2,7 @@ import rebound
 from tabulate import tabulate # used for the summary function
 import numpy as np
 import copy
-from constants import E_DEFAULT, INC_MAX, TWO_PI
+from core.constants import E_DEFAULT, INC_MAX, TWO_PI
 
 
 class BaseSystem:

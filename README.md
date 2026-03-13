@@ -29,22 +29,22 @@ Before building anything, I ran SPOCK on the first three planets (`b`, `c`, `d`)
 | 3 M_Jup giant at 3 AU  | 0.791       |
 
 ```python
-from constants import M_JUP
+from core.constants import M_JUP
 from systems.kepler11 import Kepler11
 from spock import FeatureClassifier
 
 model = FeatureClassifier()
 
 sim1 = Kepler11(seed=42).build()
-print("No giant:", model.predict_stable(sim1))  #  0.9192146
+print("No giant:", model.predict_stable(sim1))  # 0.9192146
 
 # Test 2: with distant stable giant
 sim2 = Kepler11(seed=42, outer_giant={"m": M_JUP, "a": 20.0}).build()
-print("Distant giant:", model.predict_stable(sim2))  #   0.79106146
+print("Distant giant:", model.predict_stable(sim2))  # 0.79106146
 
 # Test 3: with close destabilizing giant
-sim3 = Kepler11(seed=42, outer_giant={"m": 3*M_JUP, "a": 3.0}).build()
-print("Close giant:", model.predict_stable(sim3))  #  0.79106146
+sim3 = Kepler11(seed=42, outer_giant={"m": 3 * M_JUP, "a": 3.0}).build()
+print("Close giant:", model.predict_stable(sim3))  # 0.79106146
 ```
 
 SPOCK's predicted stability probability is statistically invariant to the outer giant's presence; 
