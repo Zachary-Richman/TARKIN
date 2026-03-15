@@ -2,7 +2,7 @@ from core import constants
 from core.constants import T_MD
 from dataclasses import dataclass
 from spock import FeatureClassifier
-from detector import Detector, UnstableDetection
+from assembly.detector import Detector, UnstableDetection
 from core.simulator import config
 
 @dataclass
@@ -33,18 +33,14 @@ def run(system, t_max: float = T_MD, check_interval: float = 50.0) -> Run | None
     """
     outer_giant = system.outer_giant or {"m": 0.0, "a": 0.0}
     run_id = f"{system.name}-{system.seed}-{outer_giant['m']:.6f}-{int(outer_giant['a'])}"
-    #print(f"[{run_id}] starting SPOCK inner")
 
     inner_system = system.__class__(seed=system.seed, outer_giant=None)
     sim_inner = config(inner_system)
     spock_inner = FeatureClassifier().predict_stable(sim_inner)
-    #print(f"[{run_id}] SPOCK inner done: {spock_inner}")
 
     sim_full = config(system.__class__(seed=system.seed, outer_giant=system.outer_giant))
     spock_full = FeatureClassifier().predict_stable(sim_full)
-    #print(f"[{run_id}] SPOCK full done: {spock_full}")
 
-    #print(f"[{run_id}] starting integration")
 
     # main integration
     sim = config(system)

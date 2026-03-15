@@ -1,21 +1,45 @@
-import rebound
-from dataclasses import dataclass
-from core import constants as const
-from typing import Literal
+"""
+assembly/detector.py
+====================
+Instability event instance detection
 
-@dataclass
-class UnstableDetection:
-    event_type: Literal[
-        "close_encounter_inner",
-        "close_encounter_outer",
-        "high_eccentricity",
-        "ejection",
-        "stellar_collision"
-    ]
-    time: float  # sim.t at detection
-    body: str | None # hash of trigger body
-    value: float | None # measured value that crossed threshold
-    threshold: float | None # threshold that was crossed (hill radius?)
+Detector (class) works with a snapshot-based instability checking system.
+It does NOT integrate, that is purely the simulation runners function
+Each call to Detector.check() reads the current simulation and returns either:
+UnstableDetection | None
+
+Detection Hierarchy (priority order):
+1. Inner-Planet Close Encounters: distance(i, j) < R_mH(i, j)
+2. Outer-Planet Close Encounters: distance(i, og) > R_mH(i, og)
+3. High Eccentricity: e_i > 0.9
+4. Stellar Collision: a_i(1 - e_i) < 0.01
+5. Ejection: a_i > 100AU or orbit() failure
+
+The mutual Hill radius between planets i and j (Gladman 1993 [1]):
+    R_mH = ((a_i + a_j) / 2) * ((m_i + m_j) / (3 * M_star))^(1/3)
+
+Mutual Hill Radii are computed once at initialization (at t=0) and are never changed.
+Near (or at) instability the radii will change (mass and semi-major axis remain constant), therefore it is not necessary to recompute the Hill Radius each .check() call
+
+
+NOTE: TARKIN uses sim.ri_whfast.safe_mode = 0 (REBOUND, Rein, et al. [2])
+    if it was set to the default (1) WHFast would recalculate all the internal coordinates (Jacobi, heliocentric, WHDS, barycentric) and
+     synchronize all every timestep, as such, to increase speed this is disabled.
+    Unconditionally, before any work is done by the checker it reconciles the internal coordinates
+    Any caller that bypasses check() and reads particle state directly MUST call sim.ri_whfast.integrator_synchronize() first.
+
+References:
+[1] Gladman 1993
+    https://doi.org/10.1006/icar.1993.1168
+[2] Rein, H. et al. REBOUND N-body integrator (v4.6.0)
+    GitHub: https://github.com/hannorein/rebound
+    Documentation: https://rebound.hanno-rein.de/integrators/
+    Accessed: March 2026
+"""
+import rebound
+from core import constants as const
+from assembly.dataclasses_.detector_dataclass import UnstableDetection
+
 
 class Detector:
     def __init__(self, sim: rebound.Simulation):
@@ -30,7 +54,7 @@ class Detector:
         except rebound.ParticleNotFound:
             return False
 
-    def _generate_static_hill_radii(self) -> dict:
+    def _generate_static_hill_radii(self) -> dict:  # [1]
         """
         Compute mutual Hill radii for all non-star particle pairs.
 
@@ -42,7 +66,7 @@ class Detector:
         statistical study and is noted as a simplification in the methods.
 
         Mutual Hill radius between planets i and j:
-            R_mH = ((a_i + a_j) / 2) * ((m_i + m_j) / (3 * M_star))^(1/3)
+            R_mH = ((a_i + a_j) / 2) * ((m_i + m_j) / (3 * M_star))^(1/3) [1]
         :param sim: rebound.Simulation object
         :return: dict of mutual Hill radii pairs
         """
@@ -68,7 +92,10 @@ class Detector:
                                mass_sum / (3 * star.m)
                        ) ** (1 / 3)
 
-                hill_radii[(i, j)] = R_mH
+                hill_radii[(  # take it by min, max, so we can know how to access it later
+                    min(i, j),
+                    max(i, j)
+                )] = R_mH
 
         return hill_radii
 
@@ -96,10 +123,13 @@ class Detector:
         """
         sim = self.sim
 
-        # define the individual pieces
-        star = sim.particles[0]
+        # since safe_mode = 0, REBOUND doesn't sync the Jacobi coords to inertial after each step
+        # therefore distance calculations are wrong, but the fix is simple [2]:
+        self.sim.integrator_synchronize()
 
+        star = sim.particles[0]
         outer_planet = None
+
         if self.has_outer_giant:
             try:
                 outer_planet = sim.particles["outer_giant"]
@@ -115,7 +145,7 @@ class Detector:
         # check inners
         for idx_i, planet_i in enumerate(inner_planets):
             for idx_j, planet_j in enumerate(inner_planets):
-                if idx_i == idx_j: continue
+                if idx_i <= idx_j: continue
 
                 d = self._distance(planet_i, planet_j)
                 R_mH = self.hill_radii[(  # getting min/max as to guarantee getting the right object
@@ -134,10 +164,11 @@ class Detector:
 
         # check outers (2)
         if outer_planet is not None:
-            for _, planet_i in enumerate(inner_planets):
+            for planet_i in inner_planets:
                 d = self._distance(planet_i, outer_planet)
                 R_mH = self.hill_radii[(  # getting min/max as to guarantee getting the right object
-                    planet_i.index, outer_planet.index
+                    min(planet_i.index, outer_planet.index),
+                    max(outer_planet.index, outer_planet.index)
                 )]
 
                 if d < R_mH:
@@ -163,7 +194,6 @@ class Detector:
                     threshold=const.MAX_SEPARATION
                 )
 
-            orb = planet.orbit(primary=star)
             if orb.e > const.MAX_ECCENTRICITY:
                 return UnstableDetection(
                     event_type="high_eccentricity",
