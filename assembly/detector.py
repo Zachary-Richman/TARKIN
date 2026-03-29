@@ -21,7 +21,6 @@ The mutual Hill radius between planets i and j (Gladman 1993 [1]):
 Mutual Hill Radii are computed once at initialization (at t=0) and are never changed.
 Near (or at) instability the radii will change (mass and semi-major axis remain constant), therefore it is not necessary to recompute the Hill Radius each .check() call
 
-
 NOTE: TARKIN uses sim.ri_whfast.safe_mode = 0 (REBOUND, Rein, et al. [2])
     if it was set to the default (1) WHFast would recalculate all the internal coordinates (Jacobi, heliocentric, WHDS, barycentric) and
      synchronize all every timestep, as such, to increase speed this is disabled.

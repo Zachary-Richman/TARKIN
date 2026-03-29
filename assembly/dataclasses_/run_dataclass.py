@@ -14,12 +14,22 @@ Field Groupings:
 * Dynamic indicators: megno_final, stable_early, t_max
 * AMD indicators: amd_inner, amd_full, amd_critical
 * Data quality indicators: rebound_version, spock_version, had_convergence_warning
+
+References:
+[1] Tamayo et al. 2020
+    https://arxiv.org/abs/2007.06521
+[2] Laskar & Petit 2017
+    https://www.aanda.org/articles/aa/pdf/2017/09/aa30022-16.pdf
 """
 from dataclasses import dataclass, fields
 
 @dataclass
-class Run:
-    run_id: str
+class FeatureExtraction:
+    m: str
+
+@dataclass
+class Run(FeatureExtraction):
+    run_id: str  # {system name}-{seed}-{giant mass}-{giant a}
     seed: int
     system_name: str
     giant_mass_mjup: float
@@ -37,15 +47,15 @@ class Run:
     spock_score_inner: float  # no giant
     spock_score_full: float  # with giant
 
-    t_max: float  # p_inner * 1e9
+    t_max: float  # p_inner * 1e9 [1]
     megno_final: float  # value at termination
     stable_early: bool  # evals true if terminated early bc/ MEGNO confidence
 
     amd_inner: float  # amd of inner system (no giant)
     amd_full: float  # amd of full system (including giant)
-    amd_critical: float  # maximum AMD a system can have while still being Hill-stable
+    amd_critical: float  # critical AMD threshold [2]
 
-    had_convergence_warning: bool  # true if WHFast timestep warning fired (in console)
+    had_convergence_warning: bool  # true if WHFast timestep warning fired
     spock_version: str
     rebound_version: str
 

@@ -4,7 +4,7 @@ import ray
 from core import constants as const
 from dataclasses import asdict, fields
 from datetime import datetime, date
-from runner import run, Run
+from assembly.runner import run, Run
 import rebound
 from systems.SyntheticTestingSystem import SyntheticTestingSystem
 

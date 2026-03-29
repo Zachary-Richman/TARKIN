@@ -1,6 +1,6 @@
 import numpy as np
 
-
+CHECK_INTERVAL = 500 # years between checks
 DAY = 1 / 365.25
 M_EARTH = 3.003e-6 # solar masses
 INTEGRATOR = "whfast"
@@ -14,10 +14,14 @@ TWO_PI = 2 * np.pi
 MIN_PERIAPSIS = 0.01      # AU — stellar collision threshold
 MAX_SEPARATION = 100.0  # AU, ejection threshold
 
-# time intervals
-T_SM = 1e4
-T_MD = 1e6
-T_LG = 1e9
+INNER_ORBIT_HORIZON = 1e9  # spock (tamayo et al. 2020) todo cite
+
+MEGNO_CHAOTIC_THRESHOLD = 10.0
+MEGNO_STABLE_THRESHOLD = 2.05
+MEGNO_MIN_FRACTION = 0.05  # min frac of t_max before stable early stop\
+
+AMD_UNSTABLE_FACTOR = 2
+AMD_STABLE_FACTOR = 0.05
 
 
 def radius_to_mass(radius):
