@@ -2,8 +2,7 @@
 Trajectory Analysis and Resonance Klassifier for Inner N-body systems (TARKIN)
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11+-blue?style=flat-square&logo=python&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Status-Active%20Research-red?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Python-3.11+-blue?style=plastic&logo=python&logoColor=white"/>
 </p>
 
 ----
