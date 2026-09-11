@@ -15,7 +15,7 @@ interactions will eventually cause collisions or ejections, is a longstanding op
 > How does the number of planets in a [compact planetary system] affect the fraction of systems that remain stable over a fixed time interval following the introduction of an additional outer gravitational perturber at a larger semi-major axis and constant mass `[m = 6 * M_jup]`?
 
 ## Methodology
-**Phase 1 - Generating Data (and if so, characterize it)**
+**Phase 1 - Generating Data (characterize it)**
 
 Using [REBOUND](https://rebound.hanno-rein.de/), a high-precision N-body integration package, we simulate compact inner planetary systems both with and without an outer companion.
 Within this phase, we will cleanse the data, (see `/Assembly`) in order to avoid initially unstable conditions
