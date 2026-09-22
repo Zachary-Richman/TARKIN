@@ -1,3 +1,5 @@
+post summer push inbound :)
+
 # Tarkin 
 Trajectory Analysis and Resonance Klassifier for Inner N-body systems (TARKIN)
 
@@ -31,10 +33,6 @@ An automated pipeline runs across a grid of outer giant parameters
 | Seeds per Configuration | 4000                      |
 | Total Runs              | 24000                     |
 
-**Phase 3 - Train an extended classifier**
-
-We (may) train a standalone XGBoost Classifier on the now generated dataset. 
-
 ## Design Decisions
 **WHFast > IAS515**. 
 The WHFast sympletic integrator conserves a modified Hamiltonian exactly over long timescale and runs 10-100x faster that REBOUND's default integrator. 
@@ -47,4 +45,4 @@ The WHFast sympletic integrator conserves a modified Hamiltonian exactly over lo
 - Rein & Tamayo 2015: [REBOUND: WHFast](https://arxiv.org/abs/1506.01084)
 - Livesey & Becker 2024: [Giant Planet Companions and Inner System Stability](https://arxiv.org/abs/2412.18661)
 
-This project is still very much under development and does not claim to make any scientific claims. As a student, I intend to learn and develop with time, the programming and scientific journey will be documented in this repository.
+This project is still very much under development and does not claim to make any scientific claims. As a student, I intend to learn and develop with time, the programming and scientific journey will be documented in this repository. 
