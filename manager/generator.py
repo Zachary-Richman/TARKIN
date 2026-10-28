@@ -28,6 +28,8 @@ class GenerateSystem:
         if not 1 <= system_id <= 105_000:
             raise ValueError("system_id must be between 1 and 105000")
 
+        self.generator_version = 1  # iteration 1 of the generator
+
         self.system_id = system_id  # run #, 1 ... 120,000
         self.seed = self.derive_seed()
         self.rng = np.random.default_rng(self.seed)
