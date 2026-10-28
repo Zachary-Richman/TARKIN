@@ -27,3 +27,5 @@ inclination_max: float = 0.05
 
 m_perturber: int = m_jup * 6.0 # kg
 a_additional_perturber: int = au * 3  # m?
+
+
