@@ -66,8 +66,7 @@ $$
 However, orbital separation alone does not account for the masses of the planets or their host star. To account for this, we define the mutual Hill radius:
 
 $$
-R_{\mathrm{H},ij}
-=
+R_{\mathrm{H},ij}=
 \frac{a_i + a_j}{2}
 \left(
 \frac{m_i + m_j}{3M_\star}
@@ -77,19 +76,13 @@ $$
 The orbital separation can then be expressed as a dimensionless multiple of the mutual Hill radius. We define this spacing parameter as $\Delta$:
 
 $$
-\Delta =
-\frac{a_j - a_i}{R_{\mathrm{H},ij}}
+\Delta = \frac{a_j - a_i}{R_{\mathrm{H},ij}}
 $$
 
 Rearranging gives:
 
 $$
-\Delta
-\frac{a_i + a_j}{2}
-\left(
-\frac{m_i + m_j}{3M_\star}
-\right)^{1/3}
-=
+\Delta \frac{a_i + a_j}{2} \left(\frac{m_i + m_j}{3M_\star}\right)^{1/3}=
 a_j - a_i
 $$
 
@@ -113,8 +106,8 @@ Expanding and rearranging to isolate $a_j$:
 
 $$
 \begin{aligned}
-a_j - a_i &= \frac{k}{2}a_i + \frac{k}{2}a_j \\[6pt]
-a_j - \frac{k}{2}a_j &= a_i + \frac{k}{2}a_i \\[6pt]
+a_j - a_i &= \frac{k}{2}a_i + \frac{k}{2}a_j \\
+a_j - \frac{k}{2}a_j &= a_i + \frac{k}{2}a_i \\
 a_j\left(1-\frac{k}{2}\right)
 &= a_i\left(1+\frac{k}{2}\right)
 \end{aligned}
