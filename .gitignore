@@ -5,5 +5,4 @@
 cmake-build-debug
 
 *.db
-
-/rebound
+.clang-format

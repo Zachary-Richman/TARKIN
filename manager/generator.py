@@ -1,7 +1,7 @@
+# rebound.sim.cite() ???
 import hashlib
 import config
 import numpy as np
-
 
 def solve_for_semi_major_axis(a_i, m_i, m_j, spacing, m_star) -> float:
     """
@@ -40,7 +40,6 @@ class GenerateSystem:
 
         self.planets = [
             {
-                "name": f"{i + 1}",
                 "mass": None,  # kg
                 "a": None,  # m; semimajor axis
                 "e": None,  # dimensionless
@@ -53,7 +52,6 @@ class GenerateSystem:
         ]
 
         self.perturber = {
-            "name": "The Sovereign",
             "mass": 0.0,  # kg
             "a": 0.0,  # m
             "e": 0.0,

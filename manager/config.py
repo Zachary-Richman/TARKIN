@@ -11,7 +11,7 @@ n_values = range(2, 9)  # n = 2...8
 total_systems = 105000
 min_planets = 2
 max_planets = 8
-sys_per_n_value = total_systems // max_planets  # divide and floor
+sys_per_n_value = total_systems // len(n_values)  # divide and floor
 
 m_planet_min = 1.0 * m_earth
 m_planet_max = 20.0 * m_earth
