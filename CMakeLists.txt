@@ -30,6 +30,8 @@ add_executable(orbit_test
         worker/src/main.c
         worker/include/creator.h
         worker/include/stability.h
+        worker/include/json_in.h
+        worker/include/json_out.h
 )
 
 target_link_libraries(orbit_test PRIVATE rebound)
