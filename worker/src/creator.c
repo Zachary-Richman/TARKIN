@@ -21,7 +21,7 @@ static double mean_to_true_anomaly(const double M, const double e) {
 }
 
 
-inline struct reb_simulation *create_simulation(const Job *job) { // job is converted into the type from json_in.h (not yet made)
+struct reb_simulation *create_simulation(const Job *job) { // job is converted into the type from json_in.h (not yet made)
 	struct reb_simulation *sim = reb_simulation_create();
 	if (sim == NULL) return NULL;
 	reb_simulation_set_integrator(sim, job->configuration.integrator.integrator);

@@ -35,14 +35,14 @@ static OrbitalBody *get_body(Job *job, const uint32_t index);
 
 static double distance(const struct reb_particle *p1, const struct reb_particle *p2);
 
-inline double *mutual_hill_radius(Job *bodies);
+double *mutual_hill_radius(Job *bodies);
 
 
-inline StabilityDetection stability_detection(struct reb_simulation *sim, const JobCondition job_condition,
+StabilityDetection stability_detection(struct reb_simulation *sim, const JobCondition job_condition,
 											  const double *mutual_hill_radii, const uint32_t original_planet_count);
 
 
-inline void stability_free(double *mutual_hill_radii)
+void stability_free(double *mutual_hill_radii);
 
 
 

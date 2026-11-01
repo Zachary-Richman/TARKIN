@@ -8,7 +8,7 @@
 #include "types.h"
 #include "cJSON.h"
 
-Job *parse_job(const cJSON *json);
+Job *parse_job(const char *json);
 
 void free_job(Job *Job);
 

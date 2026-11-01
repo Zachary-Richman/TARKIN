@@ -1,90 +1,149 @@
-# Tarkin 
-Trajectory Analysis and Resonance Klassifier for Inner N-body systems (TARKIN)
+# T.A.R.K.I.N.
+### Trajectory Analysis and Resonance Klassifier for Inner N-body Systems
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11+-blue?style=plastic&logo=python&logoColor=white"/>
-</p>
+---
 
-----
-Thousands of multi-planet systems discovered by NASA's Kepler Space Telescope contain small planets packed tightly 
-together in very close orbits around their host star. Whether these systems remain stable over billions of years, or whether gravitational 
-interactions will eventually cause collisions or ejections, is a longstanding open question in orbital dynamics.
+Planetary systems are gravitationally coupled many-body systems whose long-term evolution depends upon the masses, orbital configurations, and relative separations of their constituent bodies. Although an individual planet may initially occupy a seemingly stable orbit, gravitational interactions between multiple planets can produce cumulative changes in orbital elements over sufficiently long timescales. Consequently, stability is not solely a property of an individual orbit, but can emerge from the collective dynamical architecture of the system.
 
+Compact planetary systems are particularly useful for investigating this behaviour because their planets occupy relatively closely spaced orbits, increasing the significance of mutual gravitational interactions. As the number of planets increases, the number of pairwise interactions also increases. However, the relationship between multiplicity and stability is not necessarily represented by a simple increase or decrease in instability, because the outcome depends upon the complete orbital configuration.
 
-In 2020, researchers at Princeton published SPOCK (Stability of Planetary Orbital Configurations Klassifier), 
-a machine learning model that predicts the long-term stability of compact planetary systems at orders of magnitude faster than running full N-body simulations. 
-SPOCK represented a major advance in computational astrophysics, but it was trained exclusively on systems with no outer companion planets.
-Many real Kepler systems, however, include a distant giant planet, whose slow and persistent gravitational influence on the inner system is entirely unaccounted for in SPOCK's predictions. 
-## Research Question
-> Does the presence of an outer giant companion systematically degrade SPOCK's predictive accuracy on compact inner systems; and if so, at what giant mass and orbital separation does this effect become significant?
+An external gravitational perturber provides another mechanism through which the stability of an initially compact system can be modified. By introducing an additional massive body outside the planetary system, the internal planets are subjected to an additional gravitational influence while their initial conditions can otherwise remain unchanged. This permits the effect of the external perturbation to be investigated as a function of planetary multiplicity.
 
-## An Empirical Motivation
-Before building anything, I ran SPOCK on the first three planets (`b`, `c`, `d`) of the Kepler 11 system under three conditions:
+### Research Question
 
-| Condition              | SPOCK Score |
-|------------------------|-------------|
-| No outer giant         | 0.919       |
-| 1 M_Jup giant at 20 AU | 0.791       |
-| 3 M_Jup giant at 3 AU  | 0.791       |
+> How does the number of planets in a compact planetary system affect the fraction of systems that remain stable over a fixed time interval following the introduction of an additional outer gravitational perturber at a larger semi-major axis and constant mass?
 
-```python
-from core.constants import M_JUP
-from systems.kepler11 import Kepler11
-from spock import FeatureClassifier
-
-model = FeatureClassifier()
-
-sim1 = Kepler11(seed=42).build()
-print("No giant:", model.predict_stable(sim1))  # 0.9192146
-
-# Test 2: with distant stable giant
-sim2 = Kepler11(seed=42, outer_giant={"m": M_JUP, "a": 20.0}).build()
-print("Distant giant:", model.predict_stable(sim2))  # 0.79106146
-
-# Test 3: with close destabilizing giant
-sim3 = Kepler11(seed=42, outer_giant={"m": 3 * M_JUP, "a": 3.0}).build()
-print("Close giant:", model.predict_stable(sim3))  # 0.79106146
-```
-
-SPOCK's predicted stability probability is statistically invariant to the outer giant's presence; 
-even when a 3 Jupiter-mass companion orbits at 3 AU, well within the range expected to produce measurable secular forcing on the inner system. 
-
+---
 
 ## Methodology
-**Phase 1 - Determining if SPOCK Fails (and if so, characterize it)**
 
-Using [REBOUND](https://rebound.hanno-rein.de/), a high-precision N-body integration package, we simulate compact inner planetary systems both with and without an outer companion.
-Then, we run SPOCK's classifier on each system and compare its predicted stability against the truth from full integration. 
+T.A.R.K.I.N. (*Trajectory Analysis and Resonance Klassifier for Inner N-body Systems*) was developed specifically for this investigation to generate and analyze ensembles of gravitationally interacting planetary systems.
 
-**Phase 2 - Generate a new training dataset**
+Rather than evaluating the stability of a single predefined planetary configuration, the framework produces randomized systems according to controlled initial conditions and subsequently integrates their trajectories numerically. This allows the dependent variable of the investigation—the fraction of systems that remain stable—to be determined statistically for each planetary multiplicity.
 
-An automated pipeline runs across a grid of outer giant parameters
+The central design principle of T.A.R.K.I.N. is the separation of **system generation**, **dynamical integration**, and **stability classification**. Separating these processes allows the same initial planetary architecture to be used to construct both a control system and a perturbed system. Consequently, differences in stability can be attributed to the presence of the external perturber rather than to an independently randomized set of planetary initial conditions.
 
-| Parameter               | Range                     | Values |
-|-------------------------|---------------------------|--------|
-| Giant Mass              | 0.3-3.0 * Mass of Jupiter | 6      |
-| Semi-major axis         | 5-30 AU                   | 7      |
-| Seeds per Configuration | n/a                       | 25     |
-| Total Runs              | n/a                       | 1050   |
-**Phase 3 - Train an extended classifier**
+For each value of planetary multiplicity,
 
-We train a standalone XGBoost Classifier on the now generated dataset. Unlike SPOCK, TARKIN treats the outer
-giants properties (`mass`, `semi-major axis`, `period`, `hill stability margin`) as additional inputs alongside the inner-system features.
+$$
+n \in \{2,3,4,5,6,7,8\}
+$$
 
-## Design Decisions
-**WHFast > IAS515**. 
-The WHFast sympletic integrator conserves a modified Hamiltonian exactly over long timescale and runs 10-100x faster that REBOUND's default integrator. 
+T.A.R.K.I.N. employs [REBOUND](https://rebound.readthedocs.io/), an N-body integrator that can integrate the motion of particles under the influence of gravity (Rein and Liu, 2012). REBOUND allows for high-volume repeated simulation that would be unfeasible to determine by hand.
 
-**Log uniform planet masses**.
-Synthetic planet masses are drawn log-uniformly from 1–20 Earth masses, matching the observed Kepler compact system population (Fabrycky et al. 2012) and avoiding overrepresentation of high-mass planets.
+T.A.R.K.I.N. generates an ensemble of initially stable planetary systems. Each generated system consists of a central star and $n$ planets whose initial orbital parameters are determined according to the predefined distributions described in the paper. Randomization is performed independently between systems while maintaining the same constraints across all values of $n$.
 
+After generation, each system is divided into two corresponding experimental cases:
 
-## References
- 
-- Tamayo et al. 2020: [SPOCK: Predicting Planetary Stability](https://arxiv.org/abs/2007.06521)
-- Pu & Wu 2015: [Spacing of Kepler Planets](https://iopscience.iop.org/article/10.1088/0004-637X/807/1/44)
-- Fabrycky et al. 2012: [Architecture of Kepler's Multi-Transiting Systems](https://arxiv.org/abs/1202.6328)
-- Rein & Tamayo 2015: [REBOUND: WHFast](https://arxiv.org/abs/1506.01084)
-- Livesey & Becker 2024: [Giant Planet Companions and Inner System Stability](https://arxiv.org/abs/2412.18661)
+1. **Control system:** Contains only the central star and the $n$ planets.
+2. **Perturbed system:** Contains the same star and planets but also includes an additional gravitational body.
 
-This project is still very much under development and does not claim to make any scientific claims. As a student, I intend to learn and develop with time, the programming and scientific journey will be documented in this repository.
+Importantly, the perturbed and control systems originate from the same initial planetary configuration. This paired design reduces the influence of random variation between otherwise unrelated systems.
+
+---
+
+> **Project Status**
+>
+> This project is still very much under development and does not claim to make definitive scientific conclusions. As a student, I intend to learn and develop with time. The programming and scientific journey will be documented in this repository.
+>
+> This project is part of the International Baccalaureate Extended Essay (Physics).
+
+---
+
+# Critical Derivations
+
+## Mutual Hill Radius (Determining Orbital Separation)
+he Hill sphere framework and mutual Hill radii as a rule of
+thumb measures how close two planets can get before their
+gravity disrupts each other’s orbits (Gladman 1993). This project utilizes this value of the mutual Hill radius by effect of a spacing unit and mechanism. 
+
+Let $a_i$ and $a_j$ denote the semi-major axes of two planets, where $a_j > a_i$. Here, $a_i$ represents the inner planet and $a_j$ the outer planet. Their orbital separation is defined as:
+
+$$
+\Delta a = a_j - a_i
+$$
+
+However, orbital separation alone does not account for the masses of the planets or their host star. To account for this, we define the mutual Hill radius:
+
+$$
+R_{\mathrm{H},ij}
+=
+\frac{a_i + a_j}{2}
+\left(
+\frac{m_i + m_j}{3M_\star}
+\right)^{1/3}
+$$
+
+The orbital separation can then be expressed as a dimensionless multiple of the mutual Hill radius. We define this spacing parameter as $\Delta$:
+
+$$
+\Delta =
+\frac{a_j - a_i}{R_{\mathrm{H},ij}}
+$$
+
+Rearranging gives:
+
+$$
+\Delta
+\frac{a_i + a_j}{2}
+\left(
+\frac{m_i + m_j}{3M_\star}
+\right)^{1/3}
+=
+a_j - a_i
+$$
+
+For readability, let:
+
+$$
+k =
+\Delta
+\left(
+\frac{m_i + m_j}{3M_\star}
+\right)^{1/3}
+$$
+
+Substituting $k$ into the spacing equation gives:
+
+$$
+a_j - a_i = \frac{k}{2}(a_i + a_j)
+$$
+
+Expanding and rearranging to isolate $a_j$:
+
+$$
+\begin{aligned}
+a_j - a_i &= \frac{k}{2}a_i + \frac{k}{2}a_j \\[6pt]
+a_j - \frac{k}{2}a_j &= a_i + \frac{k}{2}a_i \\[6pt]
+a_j\left(1-\frac{k}{2}\right)
+&= a_i\left(1+\frac{k}{2}\right)
+\end{aligned}
+$$
+
+Solving for the outer planet's semi-major axis yields:
+
+$$
+a_j =
+a_i
+\frac{1+\frac{k}{2}}{1-\frac{k}{2}}
+$$
+
+Substituting the definition of $k$ gives the final expression:
+
+$$
+a_j =
+a_i
+\frac{
+1 + \dfrac{\Delta}{2}
+\left(\dfrac{m_i+m_j}{3M_\star}\right)^{1/3}
+}{
+1 - \dfrac{\Delta}{2}
+\left(\dfrac{m_i+m_j}{3M_\star}\right)^{1/3}
+}
+$$
+
+This expression allows the outer planet's semi-major axis to be calculated from the inner planet's semi-major axis, the masses of both planets, the stellar mass, and the chosen mutual-Hill spacing.
+
+For the resulting semi-major axis to be finite and positive, the denominator must be positive.
+
+It is important to note that this spacing condition is applied during initialization. It does not represent the subsequent stability of the system throughout the integration, as that is precisely what this investigation seeks to evaluate.

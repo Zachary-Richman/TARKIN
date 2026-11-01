@@ -1,6 +1,3 @@
-//
-// Created by zjric on 11/1/2026.
-//
 #include "stability.h"
 #include "rebound.h"
 #include "types.h"
@@ -26,7 +23,7 @@ static double distance(const struct reb_particle *p1, const struct reb_particle 
 	return sqrt(d_x * d_x + d_y * d_y + d_z * d_z);
 }
 
-inline double *mutual_hill_radius(Job *bodies) {
+double *mutual_hill_radius(Job *bodies) {
 	const uint32_t planet_count = bodies->planet_count;
 	const bool has_perturber = bodies->metadata.condition == CONDITION_PERTURBED;
 	const uint32_t body_count = planet_count + (has_perturber ? 1 : 0);
@@ -55,8 +52,7 @@ inline double *mutual_hill_radius(Job *bodies) {
 	return values;
 };
 
-
-inline StabilityDetection stability_detection(struct reb_simulation *sim, const JobCondition job_condition,
+StabilityDetection stability_detection(struct reb_simulation *sim, const JobCondition job_condition,
 											  const double *mutual_hill_radii, const uint32_t original_planet_count) {
 	reb_simulation_synchronize(sim);
 
@@ -133,6 +129,6 @@ inline StabilityDetection stability_detection(struct reb_simulation *sim, const 
 }
 
 
-inline void stability_free(double *mutual_hill_radii) {
+void stability_free(double *mutual_hill_radii) {
 	free(mutual_hill_radii);
 }

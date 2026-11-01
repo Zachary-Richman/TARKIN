@@ -38,7 +38,6 @@ endif()
 
 add_library(cjson STATIC
         "${CJSON_DIR}/cJSON.c"
-        worker/include/json_in.h
 )
 
 target_include_directories(cjson PUBLIC
@@ -52,6 +51,7 @@ add_executable(orbit_test
         worker/src/stability.c
         worker/src/creator.c
         worker/src/simulation.c
+        worker/src/dynamic_fgets.c
 )
 
 # Project headers

@@ -1,6 +1,9 @@
 from generator import GenerateSystem
 from json_out import build_job
 from _types import JobCondition, Star, IntegratorConfig, OrbitalBody
+import json
+import subprocess
+
 
 star = Star(
     mass=1.989e30,
@@ -27,3 +30,29 @@ job = build_job(
 )
 
 print(job)
+
+worker = subprocess.Popen(
+    [r"./cmake-build-debug/orbit_test.exe"],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    stderr=None,
+    text=True,
+    bufsize=1
+)
+
+try:
+    # Send job
+    worker.stdin.write(job + "\n")
+    worker.stdin.flush()
+
+    # Receive result
+    result_json = worker.stdout.readlines()
+
+    if not result_json:
+        raise RuntimeError("C worker exited without returning a result")
+
+    print("C stdout:", result_json)
+
+finally:
+    worker.stdin.close()
+    worker.wait()
